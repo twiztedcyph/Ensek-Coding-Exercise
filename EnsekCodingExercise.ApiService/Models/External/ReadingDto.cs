@@ -25,6 +25,6 @@
         /// <summary>
         /// Value of the reading
         /// </summary>
-        public int Value { get; set; }
+        public string MeterReadValue { get; set; } = string.Empty;
     }
 }

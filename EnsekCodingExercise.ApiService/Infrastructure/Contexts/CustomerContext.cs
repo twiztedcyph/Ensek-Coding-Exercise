@@ -8,15 +8,20 @@ namespace EnsekCodingExercise.ApiService.Infrastructure.Contexts
     /// </summary>
     public class CustomerContext : DbContext
     {
+        /// <summary>
+        /// Accounts DbSet
+        /// </summary>
         public DbSet<Account> Accounts { get; set; }
         
+        /// <summary>
+        /// Readings DbSet
+        /// </summary>
         public DbSet<Reading> Readings { get; set; }
 
+        /// <summary>
+        /// Customer Context Constructor
+        /// </summary>
+        /// <param name="options"></param>
         public CustomerContext(DbContextOptions<CustomerContext> options) : base(options){ }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            
-        }
     }
 }

@@ -1,4 +1,5 @@
 using EnsekCodingExercise.ApiService.Infrastructure.Contexts;
+using EnsekCodingExercise.ApiService.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
@@ -14,10 +15,13 @@ builder.Services.AddProblemDetails();
 
 // I'm using sql server here because I have it setup. Any database compatible with EF would work.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<CustomerContext>(options =>
+builder.Services.AddDbContextFactory<CustomerContext>(options =>
 {
     options.UseSqlServer(connectionString);
 });
+
+builder.Services.AddScoped<AccountsService>();
+builder.Services.AddScoped<ReadingsService>();
 
 // Add the ability to version our API.
 builder.Services.AddApiVersioning(options =>
@@ -54,6 +58,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// I've not been asked to add authorization or authentication so I'm not going to. But normally I would setup it up in here.
 
 app.MapControllers();
 app.MapControllerRoute(

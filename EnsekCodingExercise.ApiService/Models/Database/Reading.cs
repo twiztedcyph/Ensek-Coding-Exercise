@@ -30,6 +30,8 @@ namespace EnsekCodingExercise.ApiService.Models.Database
         /// Value of the reading
         /// </summary>
         [Required]
-        public int Value { get; set; }
+        [MaxLength(5)]
+        [MinLength(5)]
+        public string MeterReadValue { get; set; } = string.Empty;
     }
 }
