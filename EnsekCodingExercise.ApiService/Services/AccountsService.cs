@@ -1,6 +1,7 @@
 ﻿using EnsekCodingExercise.ApiService.Infrastructure.Contexts;
 using EnsekCodingExercise.ApiService.Models.Database;
 using EnsekCodingExercise.ApiService.Models.External;
+using EnsekCodingExercise.ApiService.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace EnsekCodingExercise.ApiService.Services
@@ -8,7 +9,7 @@ namespace EnsekCodingExercise.ApiService.Services
     /// <summary>
     /// Collection of Accounts Services
     /// </summary>
-    public class AccountsService
+    public class AccountsService : IAccountsService
     {
         private readonly IDbContextFactory<CustomerContext> _dbContextFactory;
 

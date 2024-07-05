@@ -1,7 +1,7 @@
 ﻿using Asp.Versioning;
 using EnsekCodingExercise.ApiService.Infrastructure.BaseControllers;
 using EnsekCodingExercise.ApiService.Models.External;
-using EnsekCodingExercise.ApiService.Services;
+using EnsekCodingExercise.ApiService.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EnsekCodingExercise.ApiService.Controllers
@@ -11,13 +11,13 @@ namespace EnsekCodingExercise.ApiService.Controllers
     /// </summary>
     public class AccountsController : BaseController
     {
-        private readonly AccountsService _accountsService;
+        private readonly IAccountsService _accountsService;
 
         /// <summary>
         /// Accounts Controller Constructor
         /// </summary>
         /// <param name="accountsService">The Account Service</param>
-        public AccountsController(AccountsService accountsService)
+        public AccountsController(IAccountsService accountsService)
         {
             _accountsService = accountsService;
         }

@@ -1,5 +1,6 @@
 using EnsekCodingExercise.ApiService.Infrastructure.Contexts;
 using EnsekCodingExercise.ApiService.Services;
+using EnsekCodingExercise.ApiService.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
@@ -20,8 +21,8 @@ builder.Services.AddDbContextFactory<CustomerContext>(options =>
     options.UseSqlServer(connectionString);
 });
 
-builder.Services.AddScoped<AccountsService>();
-builder.Services.AddScoped<ReadingsService>();
+builder.Services.AddScoped<IAccountsService, AccountsService>();
+builder.Services.AddScoped<IReadingsService, ReadingsService>();
 
 // Add the ability to version our API.
 builder.Services.AddApiVersioning(options =>

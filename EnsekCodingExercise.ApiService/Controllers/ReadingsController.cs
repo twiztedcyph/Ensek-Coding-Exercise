@@ -1,7 +1,7 @@
 ﻿using Asp.Versioning;
 using EnsekCodingExercise.ApiService.Infrastructure.BaseControllers;
 using EnsekCodingExercise.ApiService.Models.External;
-using EnsekCodingExercise.ApiService.Services;
+using EnsekCodingExercise.ApiService.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EnsekCodingExercise.ApiService.Controllers
@@ -11,13 +11,13 @@ namespace EnsekCodingExercise.ApiService.Controllers
     /// </summary>
     public class ReadingsController : BaseController
     {
-        private readonly ReadingsService _readingsService;
+        private readonly IReadingsService _readingsService;
 
         /// <summary>
         /// Readings Controller Constructor
         /// </summary>
         /// <param name="readingsService">The Readings Service</param>
-        public ReadingsController(ReadingsService readingsService)
+        public ReadingsController(IReadingsService readingsService)
         {
             _readingsService = readingsService;
         }

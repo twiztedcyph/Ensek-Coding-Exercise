@@ -1,9 +1,8 @@
 ﻿using CsvHelper;
-using CsvHelper.Configuration;
 using EnsekCodingExercise.ApiService.Infrastructure.Contexts;
 using EnsekCodingExercise.ApiService.Models.Database;
 using EnsekCodingExercise.ApiService.Models.External;
-using Microsoft.AspNetCore.Http.HttpResults;
+using EnsekCodingExercise.ApiService.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -13,7 +12,7 @@ namespace EnsekCodingExercise.ApiService.Services
     /// <summary>
     /// Collection of Readings Services
     /// </summary>
-    public class ReadingsService
+    public class ReadingsService : IReadingsService
     {
         private readonly IDbContextFactory<CustomerContext> _dbContextFactory;
 
@@ -149,45 +148,63 @@ namespace EnsekCodingExercise.ApiService.Services
         }
 
         /// <summary>
-        /// 
+        /// Import readings from an uploaded file.
         /// </summary>
-        /// <param name="formFile"></param>
+        /// <param name="formFile">The uploaded file containing the readings to be imported</param>
         /// <returns></returns>
         public async Task<UploadResults> UploadReadingsFromFile(IFormFile formFile)
         {
-            // Probably a bit over the top...
-            var successfulReadings = new List<Reading>();
-            var failedReadings = new List<Reading>();
+            // This will blow up on rubbish or poorly formatted date strings but I've not been told to validate date so assuming it's correctly formatted.
+            var readings = new List<Reading>();
+            var failedReadings = 0;
 
             using var context = await _dbContextFactory.CreateDbContextAsync();
             using var reader = new StreamReader(formFile.OpenReadStream());
             using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
-            var readings = csv.GetRecords<dynamic>().ToList();
 
-            // Ok bed time but I suggest that tomorrow we add a booking object that exactly matches the csv.
-            //foreach (var reading in readings)
-            //{
-            //    var isNew = !await context.Readings.AnyAsync(x => x.ReadingId == reading.ReadingId);
-            //    var accountExists = await context.Accounts.AnyAsync(x => x.AccountId == reading.AccountId);
-            //    var isLatestReading = !await context.Readings.AnyAsync(x => x.AccountId == reading.AccountId && x.ReadingDateTime > reading.ReadingDateTime);
-            //    var meterReadValueIsValid = Regex.IsMatch(reading.MeterReadValue.ToString(), @"^[0-9]{5}$", RegexOptions.None, TimeSpan.FromMilliseconds(100));
-            //    if (isNew && accountExists && isLatestReading && meterReadValueIsValid)
-            //    {
-            //        successfulReadings.Add(reading);
-            //    }
-            //    else
-            //    {
-            //       failedReadings.Add(reading);
-            //    }
-            //}
+            var anonymousTypeDefinition = new
+            {
+                AccountId = -1,
+                MeterReadingDateTime = string.Empty,
+                MeterReadValue = string.Empty
+            };
 
-            await context.Readings.AddRangeAsync(successfulReadings);
+            var inputLines = csv.GetRecords(anonymousTypeDefinition).ToList();
+            var totalReadings = inputLines.Count;
+            foreach (var line in inputLines)
+            {
+                var reading = new Reading
+                {
+                    AccountId = line.AccountId,
+                    ReadingDateTime = DateTime.Parse(line.MeterReadingDateTime),
+                    MeterReadValue = line.MeterReadValue
+                };
+
+                var isNew = !await context.Readings.AnyAsync(x => x.AccountId == reading.AccountId
+                                                                  && x.ReadingDateTime == reading.ReadingDateTime
+                                                                  && x.MeterReadValue == x.MeterReadValue);
+                var accountExists = await context.Accounts.AnyAsync(x => x.AccountId == reading.AccountId);
+                var isLatestReading = !await context.Readings.AnyAsync(x => x.AccountId == reading.AccountId && x.ReadingDateTime > reading.ReadingDateTime);
+                var meterReadValueIsValid = Regex.IsMatch(reading.MeterReadValue.ToString(), @"^[0-9]{5}$", RegexOptions.None, TimeSpan.FromMilliseconds(100));
+
+                if (isNew && accountExists && isLatestReading && meterReadValueIsValid)
+                {
+                    readings.Add(reading);
+                }
+                else
+                {
+                    failedReadings++;
+                }
+            }
+
+            await context.Readings.AddRangeAsync(readings);
             await context.SaveChangesAsync();
 
             var uploadResults = new UploadResults
             {
-                Successful = successfulReadings.Count,
-                Failed = failedReadings.Count
+                Successful = readings.Count,
+                Failed = failedReadings,
+                TotalRecords = totalReadings
             };
 
             return uploadResults;
