@@ -156,6 +156,7 @@ namespace EnsekCodingExercise.ApiService.Services
         {
             // This will blow up on rubbish or poorly formatted date strings but I've not been told to validate date so assuming it's correctly formatted.
             var readings = new List<Reading>();
+            var successfulReadings = 0;
             var failedReadings = 0;
 
             using var context = await _dbContextFactory.CreateDbContextAsync();
@@ -182,14 +183,16 @@ namespace EnsekCodingExercise.ApiService.Services
 
                 var isNew = !await context.Readings.AnyAsync(x => x.AccountId == reading.AccountId
                                                                   && x.ReadingDateTime == reading.ReadingDateTime
-                                                                  && x.MeterReadValue == x.MeterReadValue);
+                                                                  && x.MeterReadValue == reading.MeterReadValue);
                 var accountExists = await context.Accounts.AnyAsync(x => x.AccountId == reading.AccountId);
                 var isLatestReading = !await context.Readings.AnyAsync(x => x.AccountId == reading.AccountId && x.ReadingDateTime > reading.ReadingDateTime);
                 var meterReadValueIsValid = Regex.IsMatch(reading.MeterReadValue.ToString(), @"^[0-9]{5}$", RegexOptions.None, TimeSpan.FromMilliseconds(100));
 
                 if (isNew && accountExists && isLatestReading && meterReadValueIsValid)
                 {
-                    readings.Add(reading);
+                    await context.Readings.AddAsync(reading); // Add to context so we can save it later but also so we can validate
+                    await context.SaveChangesAsync();
+                    successfulReadings++;
                 }
                 else
                 {
@@ -197,12 +200,9 @@ namespace EnsekCodingExercise.ApiService.Services
                 }
             }
 
-            await context.Readings.AddRangeAsync(readings);
-            await context.SaveChangesAsync();
-
             var uploadResults = new UploadResults
             {
-                Successful = readings.Count,
+                Successful = successfulReadings,
                 Failed = failedReadings,
                 TotalRecords = totalReadings
             };

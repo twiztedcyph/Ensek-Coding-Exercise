@@ -1,0 +1,73 @@
+﻿@using EnsekCodingExercise.Web.Clients
+@using EnsekCodingExercise.Web.Models
+@inject AccountsApiClient accountApiClient
+
+@if (account == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="@account" OnInvalidSubmit="SaveChanges">
+        <DataAnnotationsValidator />
+        <div class="form-group row mb-3">
+            <label class="col-md-4 col-form-label">Account Id :</label>
+            <label class="col-md-6 col-form-label">@AccountId</label>
+        </div>
+        <div class="form-group row mb-3">
+            <label class="col-md-4 col-form-label">First Name: <span class="text-danger">*</span></label>
+            <div class="col-md-6">
+                <InputText class="form-control" @bind-Value="account.FirstName" Placeholder="Enter Customer Name" />
+                <ValidationMessage For="@(() => account.FirstName)" />
+            </div>
+        </div>
+        <div class="form-group row mb-3">
+            <label class="col-md-4 col-form-label">Last Name: <span class="text-danger">*</span></label>
+            <div class="col-md-6">
+                <InputText class="form-control" @bind-Value="account.LastName" Placeholder="Enter Customer Name" />
+                <ValidationMessage For="@(() => account.LastName)" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-right">
+                <Button Type="ButtonType.Submit" Color="ButtonColor.Success" Class="float-end me-2" data-dismiss="modal" @onclick="SaveChanges">Submit</Button>
+            </div>
+        </div>
+    </EditForm>
+}
+
+@code {
+    private Account? account;
+
+    [Parameter] public int AccountId { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClickCallback { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // I'd just pass this in but let's fetch it just for demonstration purposes
+        account = await accountApiClient.GetAccountByIdAsync(AccountId);
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        account = await accountApiClient.GetAccountByIdAsync(AccountId);
+        await base.OnParametersSetAsync();
+    }
+
+    private async Task SaveChanges()
+    {
+        if (account != null)
+        {
+            var editModel = new EnsekCodingExercise.Web.Models.EditAccount
+            {
+                AccountId = account.AccountId,
+                FirstName = account.FirstName,
+                LastName = account.LastName
+            };
+            await accountApiClient.EditAccountAsync(editModel.AccountId, editModel);
+            await OnClickCallback.InvokeAsync();
+            account = null;
+        }
+    }
+}

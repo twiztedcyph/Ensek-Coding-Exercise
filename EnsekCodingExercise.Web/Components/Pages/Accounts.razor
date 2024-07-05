@@ -1,0 +1,61 @@
+﻿@page "/accounts"
+@using EnsekCodingExercise.Web.Models;
+@using EnsekCodingExercise.Web.Clients;
+@using EnsekCodingExercise.Web.Components.Modals;
+@inject AccountsApiClient accountApiClient
+
+<Modal @ref="editAccountModal"></Modal>
+@if (accounts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th width="50">Account ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var account in accounts)
+            {
+                <tr>
+                    <td>@account.AccountId</td>
+                    <td>@account.FirstName</td>
+                    <td>@account.LastName</td>
+                    <td><button class="me-2" @onclick="() => EditAccount(account.AccountId)">Edit</button><button>Delete</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    private List<Account> accounts = new List<Account>();
+    private Modal editAccountModal { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        accounts = await accountApiClient.GetAccountsAsync();
+    }
+
+    private async Task EditAccount(int accountId)
+    {
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("AccountId", accountId);
+        parameters.Add("OnclickCallback", EventCallback.Factory.Create<MouseEventArgs>(this, CloseModalAndRefreshAccounts));
+        await editAccountModal.ShowAsync<EnsekCodingExercise.Web.Components.Modals.EditAccount>(title: "Edit Account", parameters: parameters);
+    }
+
+    public async Task CloseModalAndRefreshAccounts()
+    {
+        await editAccountModal.HideAsync();
+        editAccountModal.Dispose();
+        accounts = await accountApiClient.GetAccountsAsync();
+    }
+}
