@@ -1,0 +1,105 @@
+﻿@page "/accounts"
+@using EnsekCodingExercise.Web.Models;
+@using EnsekCodingExercise.Web.Clients;
+@using EnsekCodingExercise.Web.Components.Modals;
+@inject AccountsApiClient accountApiClient
+
+<Modal @ref="editAccountModal"></Modal>
+<Modal @ref="viewAccountModal"></Modal>
+<Modal @ref="createAccountModal"></Modal>
+
+@if (accounts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <button class="btn btn-primary mb-3" @onclick="CreateAccount">Create Account</button>
+    <table class="table">
+        <thead>
+            <tr>
+                <th width="50">Account ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var account in accounts)
+            {
+                <tr>
+                    <td>@account.AccountId</td>
+                    <td>@account.FirstName</td>
+                    <td>@account.LastName</td>
+                    <td>
+                        <button class="btn btn-secondary me-2" @onclick="() => ViewAccount(account.AccountId)">View</button>
+                        <button class="btn btn-secondary me-2" @onclick="() => EditAccount(account.AccountId)">Edit</button>
+                        <button class="btn btn-secondary" @onclick="() => DeleteAccount(account.AccountId)" disabled="@IsDeleting(account.AccountId)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Account> accounts = new List<Account>();
+    private HashSet<int> deletingAccounts = new HashSet<int>();
+    private Modal? editAccountModal { get; set; }
+    private Modal? viewAccountModal { get; set; }
+    private Modal? createAccountModal { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        accounts = await accountApiClient.GetAccountsAsync();
+    }
+
+    private async Task ViewAccount(int accountId)
+    {
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("AccountId", accountId);
+        await viewAccountModal!.ShowAsync<EnsekCodingExercise.Web.Components.Modals.ViewAccount>(title: "View Account", parameters: parameters);
+    }
+
+    private async Task EditAccount(int accountId)
+    {
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("AccountId", accountId);
+        parameters.Add("OnclickCallback", EventCallback.Factory.Create<MouseEventArgs>(this, CloseModalAndRefreshAccounts));
+        await editAccountModal!.ShowAsync<EnsekCodingExercise.Web.Components.Modals.EditAccount>(title: "Edit Account", parameters: parameters);
+    }
+
+    private async Task CreateAccount()
+    {
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("OnclickCallback", EventCallback.Factory.Create<MouseEventArgs>(this, CloseModalAndRefreshAccounts));
+        await createAccountModal!.ShowAsync<EnsekCodingExercise.Web.Components.Modals.CreateAccount>(title: "Create Account", parameters: parameters);
+    }
+
+    private async Task DeleteAccount(int accountId)
+    {
+        deletingAccounts.Add(accountId);
+        await accountApiClient.DeleteAccountAsync(accountId);
+        accounts = await accountApiClient.GetAccountsAsync();
+        deletingAccounts.Remove(accountId);
+    }
+
+    private bool IsDeleting(int accountId)
+    {
+        return deletingAccounts.Contains(accountId);
+    }
+
+    public async Task CloseModalAndRefreshAccounts()
+    {
+        if (editAccountModal != null)
+        {
+            await editAccountModal.HideAsync();
+        }
+        if (createAccountModal != null)
+        {
+            await createAccountModal.HideAsync();
+        }
+
+        accounts = await accountApiClient.GetAccountsAsync();
+    }
+}

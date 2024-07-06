@@ -1,0 +1,45 @@
+﻿@using EnsekCodingExercise.Web.Clients
+@using EnsekCodingExercise.Web.Models
+@inject ReadingsApiClient readingsApiClient
+
+@if (reading == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="form-group row mb-3">
+        <label class="col-md-4 col-form-label">Reading ID:</label>
+        <label class="col-md-6 col-form-label">@reading.ReadingId</label>
+    </div>
+    <div class="form-group row mb-3">
+        <label class="col-md-4 col-form-label">Account ID:</label>
+        <label class="col-md-6 col-form-label">@reading.AccountId</label>
+    </div>
+    <div class="form-group row mb-3">
+        <label class="col-md-4 col-form-label">Reading Date Time:</label>
+        <label class="col-md-6 col-form-label">@reading.ReadingDateTime?.ToString("g")</label>
+    </div>
+    <div class="form-group row mb-3">
+        <label class="col-md-4 col-form-label">Meter Read Value:</label>
+        <label class="col-md-6 col-form-label">@reading.MeterReadValue</label>
+    </div>
+}
+
+@code {
+    private Reading? reading;
+
+    [Parameter] public int ReadingId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        reading = await readingsApiClient.GetReadingByIdAsync(ReadingId);
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        reading = await readingsApiClient.GetReadingByIdAsync(ReadingId);
+        await base.OnParametersSetAsync();
+    }
+}

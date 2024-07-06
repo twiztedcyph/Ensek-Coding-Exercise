@@ -1,0 +1,122 @@
+﻿@page "/readings"
+@using EnsekCodingExercise.Web.Clients
+@using EnsekCodingExercise.Web.Components.Modals
+@inject ReadingsApiClient readingsApiClient
+
+<Modal @ref="viewReadingModal"></Modal>
+<Modal @ref="editReadingModal"></Modal>
+<Modal @ref="createReadingModal"></Modal>
+<Modal @ref="uploadReadingsModal"></Modal>
+
+@if (readings == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <button class="btn btn-primary mb-3" @onclick="CreateReading">Create Reading</button>
+    <button class="btn btn-secondary mb-3 ms-2" @onclick="UploadReadings">Upload Readings</button>
+    <table class="table">
+        <thead>
+            <tr>
+                <th width="100">Reading ID</th>
+                <th>Account ID</th>
+                <th>Reading Date Time</th>
+                <th>Meter Read Value</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var reading in readings)
+            {
+                <tr>
+                    <td>@reading.ReadingId</td>
+                    <td>@reading.AccountId</td>
+                    <td>@reading.ReadingDateTime?.ToString("g")</td>
+                    <td>@reading.MeterReadValue</td>
+                    <td>
+                        <button class="btn btn-secondary me-2" @onclick="() => ViewReading(reading.ReadingId)">View</button>
+                        <button class="btn btn-secondary me-2" @onclick="() => EditReading(reading.ReadingId)">Edit</button>
+                        <button class="btn btn-secondary" @onclick="() => DeleteReading(reading.ReadingId)" disabled="@IsDeleting(reading.ReadingId)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<EnsekCodingExercise.Web.Models.Reading> readings = new List<EnsekCodingExercise.Web.Models.Reading>();
+    private HashSet<int> deletingReadings = new HashSet<int>();
+    private Modal? viewReadingModal { get; set; }
+    private Modal? editReadingModal { get; set; }
+    private Modal? createReadingModal { get; set; }
+    private Modal? uploadReadingsModal { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        readings = await readingsApiClient.GetAllReadingsAsync();
+    }
+
+    private async Task ViewReading(int readingId)
+    {
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("ReadingId", readingId);
+        await viewReadingModal!.ShowAsync<ViewReading>(title: "View Reading", parameters: parameters);
+    }
+
+    private async Task EditReading(int readingId)
+    {
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("Id", readingId);
+        parameters.Add("OnClickCallback", EventCallback.Factory.Create<MouseEventArgs>(this, CloseModalAndRefreshReadings));
+        await editReadingModal!.ShowAsync<EditReading>(title: "Edit Reading", parameters: parameters);
+    }
+
+    private async Task CreateReading()
+    {
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("OnClickCallback", EventCallback.Factory.Create<MouseEventArgs>(this, CloseModalAndRefreshReadings));
+        await createReadingModal!.ShowAsync<CreateReading>(title: "Create Reading", parameters: parameters);
+    }
+
+    private async Task UploadReadings()
+    {
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("OnClickCallback", EventCallback.Factory.Create<MouseEventArgs>(this, CloseModalAndRefreshReadings));
+        await uploadReadingsModal!.ShowAsync<UploadReadings>(title: "Upload Readings", parameters: parameters);
+    }
+
+    private async Task DeleteReading(int readingId)
+    {
+        deletingReadings.Add(readingId);
+        await readingsApiClient.DeleteReadingAsync(readingId);
+        readings = await readingsApiClient.GetAllReadingsAsync();
+        deletingReadings.Remove(readingId);
+    }
+
+    private bool IsDeleting(int readingId)
+    {
+        return deletingReadings.Contains(readingId);
+    }
+
+    public async Task CloseModalAndRefreshReadings()
+    {
+        if (editReadingModal != null)
+        {
+            await editReadingModal.HideAsync();
+        }
+        
+        if (createReadingModal != null)
+        {
+            await createReadingModal.HideAsync();
+        }
+
+        if (uploadReadingsModal != null)
+        {
+            await uploadReadingsModal.HideAsync();
+        }
+
+        readings = await readingsApiClient.GetAllReadingsAsync();
+    }
+}
