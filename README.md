@@ -1,3 +1,7 @@
+Delete FROM [EnsekCodingExercise].[dbo].[__EFMigrationsHistory];
+Drop table [EnsekCodingExercise].[dbo].Readings;
+Drop table [EnsekCodingExercise].[dbo].Accounts;
+
 # Ensek-Coding-Exercise
 Coding exercise for ENSEK
 
@@ -15,19 +19,19 @@ As an Energy Company Account Manager, I want to be able to load a CSV file of Cu
 ## Acceptance Criteria
 
 ### Must haves
-- [ ] Create the following endpoint - POST => /meter-reading-uploads 
-- [ ] The endpoint should be able to process a CSV of meter readings. An example CSV file has been provided (Meter_reading.csv) 
-- [ ] Each entry in the CSV should be validated and if valid, stored in a DB. 
-- [ ] After processing, the number of successful/failed readings should be returned. 
+- [x] Create the following endpoint - POST => /meter-reading-uploads 
+- [x] The endpoint should be able to process a CSV of meter readings. An example CSV file has been provided (Meter_reading.csv) 
+- [x] Each entry in the CSV should be validated and if valid, stored in a DB. 
+- [x] After processing, the number of successful/failed readings should be returned. 
 
 ### Validation
-- [ ] You should not be able to load the same entry twice 
-- [ ] A meter reading must be associated with an Account ID to be deemed valid 
-- [ ] Reading values should be in the format NNNNN 
+- [x] You should not be able to load the same entry twice 
+- [x] A meter reading must be associated with an Account ID to be deemed valid 
+- [x] Reading values should be in the format NNNNN 
 
 ### Nice to have
-- [ ] Create a client in the technology of your choosing to consume the API. You can use angular/react/whatever you like 
-- [ ] When an account has an existing read, ensure the new read isn’t older than the existing read
+- [x] Create a client in the technology of your choosing to consume the API. You can use angular/react/whatever you like 
+- [x] When an account has an existing read, ensure the new read isn’t older than the existing read
 
 ## Tips
 We want you to be able to give of your best in this exercise so here are some pointers on what we look for when we mark it: 
