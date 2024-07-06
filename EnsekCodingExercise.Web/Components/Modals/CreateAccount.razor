@@ -1,0 +1,39 @@
+﻿@using EnsekCodingExercise.Web.Clients
+@using EnsekCodingExercise.Web.Models
+@inject AccountsApiClient accountApiClient
+
+<EditForm Model="@account" OnValidSubmit="SaveChanges">
+    <DataAnnotationsValidator />
+    <div class="form-group row mb-3">
+        <label class="col-md-4 col-form-label">First Name: <span class="text-danger">*</span></label>
+        <div class="col-md-6">
+            <InputText class="form-control" @bind-Value="account.FirstName" Placeholder="Enter First Name" />
+            <ValidationMessage For="@(() => account.FirstName)" />
+        </div>
+    </div>
+    <div class="form-group row mb-3">
+        <label class="col-md-4 col-form-label">Last Name: <span class="text-danger">*</span></label>
+        <div class="col-md-6">
+            <InputText class="form-control" @bind-Value="account.LastName" Placeholder="Enter Last Name" />
+            <ValidationMessage For="@(() => account.LastName)" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 text-right">
+            <Button Type="ButtonType.Submit" Color="ButtonColor.Success" Class="float-end me-2" data-dismiss="modal">Submit</Button>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    private EnsekCodingExercise.Web.Models.CreateAccount account = new EnsekCodingExercise.Web.Models.CreateAccount();
+
+    [Parameter] public EventCallback<MouseEventArgs> OnClickCallback { get; set; }
+
+    private async Task SaveChanges()
+    {
+        await accountApiClient.CreateAccountAsync(account);
+        await OnClickCallback.InvokeAsync();
+        account = new EnsekCodingExercise.Web.Models.CreateAccount();
+    }
+}

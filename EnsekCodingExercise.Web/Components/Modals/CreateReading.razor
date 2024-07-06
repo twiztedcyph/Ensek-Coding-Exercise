@@ -1,0 +1,71 @@
+﻿@page "/create-reading"
+@using EnsekCodingExercise.Web.Clients
+@using EnsekCodingExercise.Web.Models
+@inject ReadingsApiClient readingsApiClient
+
+<EditForm Model="@createReading" OnValidSubmit="SaveChanges">
+    <DataAnnotationsValidator />
+    <div class="form-group row mb-3">
+        <label class="col-md-4 col-form-label">Account ID: <span class="text-danger">*</span></label>
+        <div class="col-md-6">
+            <InputNumber class="form-control" @bind-Value="createReading.AccountId" Placeholder="Enter Account ID" />
+            <ValidationMessage For="@(() => createReading.AccountId)" />
+        </div>
+    </div>
+    <div class="form-group row mb-3">
+        <label class="col-md-4 col-form-label">Reading Date: <span class="text-danger">*</span></label>
+        <div class="col-md-6">
+            <DateInput TValue="DateOnly?" class="form-control" @bind-Value="createReading.ReadingDate" Placeholder="Enter Reading Date" />
+            <ValidationMessage For="@(() => createReading.ReadingDate)" />
+        </div>
+    </div>
+    <div class="form-group row mb-3">
+        <label class="col-md-4 col-form-label">Reading Time: <span class="text-danger">*</span></label>
+        <div class="col-md-6">
+            <TimeInput TValue="TimeOnly?" class="form-control" @bind-Value="createReading.ReadingTime" Placeholder="Enter Reading Date" />
+            <ValidationMessage For="@(() => createReading.ReadingTime)" />
+        </div>
+    </div>
+    <div class="form-group row mb-3">
+        <label class="col-md-4 col-form-label">Meter Read Value: <span class="text-danger">*</span></label>
+        <div class="col-md-6">
+            <InputText class="form-control" @bind-Value="createReading.MeterReadValue" Placeholder="Enter Meter Read Value" />
+            <ValidationMessage For="@(() => createReading.MeterReadValue)" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 text-right">
+            <Button Type="ButtonType.Submit" Color="ButtonColor.Success" Class="float-end me-2">Submit</Button>
+        </div>
+    </div>
+</EditForm>
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger mt-3">@errorMessage</div>
+}
+
+@code {
+    private EnsekCodingExercise.Web.Models.CreateReading createReading = new EnsekCodingExercise.Web.Models.CreateReading();
+    private string? errorMessage;
+
+    [Parameter] public EventCallback<MouseEventArgs> OnClickCallback { get; set; }
+
+    private async Task SaveChanges()
+    {
+        errorMessage = null;
+        try
+        {
+            await readingsApiClient.CreateReadingAsync(createReading);
+            await OnClickCallback.InvokeAsync();
+            createReading = new EnsekCodingExercise.Web.Models.CreateReading();
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An unexpected error occurred: {ex.Message}";
+        }
+    }
+}

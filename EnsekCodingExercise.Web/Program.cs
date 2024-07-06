@@ -13,8 +13,11 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddOutputCache();
 
-builder.Services.AddHttpClient<AccountsApiClient>();
-//builder.Services.AddHttpClient<ReadingsApiClient>();
+builder.Services.AddHttpClient<AccountsApiClient>(options => 
+{
+
+});
+builder.Services.AddHttpClient<ReadingsApiClient>();
 
 
 var app = builder.Build();

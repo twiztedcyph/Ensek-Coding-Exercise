@@ -50,11 +50,11 @@ namespace EnsekCodingExercise.Tests
                 MeterReadValue = "12345"
             };
 
-            var readingId = await _readingsService.CreateReading(createModel);
-            Assert.True(readingId > 0);
+            var result = await _readingsService.CreateReading(createModel);
+            Assert.True(result.ContainsKey("success"));
 
             // Read
-            var reading = await _readingsService.GetReadingById(readingId);
+            var reading = await _readingsService.GetReadingById(int.Parse(result["success"]));
             Assert.NotNull(reading);
             Assert.Equal(createModel.AccountId, reading.AccountId);
             Assert.Equal(createModel.ReadingDateTime, reading.ReadingDateTime);

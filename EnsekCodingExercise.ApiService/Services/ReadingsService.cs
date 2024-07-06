@@ -71,14 +71,25 @@ namespace EnsekCodingExercise.ApiService.Services
         /// <param name="createReadingModel">Model containing the details of the reading to be created</param>
         /// <returns>The ID of the created Reading</returns>
         /// <exception cref="KeyNotFoundException">Thrown if the Account that the reading is being added to cannot be found</exception>
-        public async Task<int> CreateReading(CreateReadingModel createReadingModel)
+        public async Task<Dictionary<string, string>> CreateReading(CreateReadingModel createReadingModel)
         {
+            var result = new Dictionary<string, string>();
             // Check that we have a valid account
             using var context = await _dbContextFactory.CreateDbContextAsync();
             var account = await context.Accounts.FindAsync(createReadingModel.AccountId);
             if (account == null)
             {
-                throw new KeyNotFoundException($"Account with ID {createReadingModel.AccountId} not found");
+                result.Add("error", $"Account with ID {createReadingModel.AccountId} not found");
+            }
+            else if (await context.Readings.AnyAsync(x => x.AccountId == createReadingModel.AccountId && x.ReadingDateTime > createReadingModel.ReadingDateTime))
+            {
+                result.Add("error", "Reading date is not the latest reading for this account");
+            }
+            else if (await context.Readings.AnyAsync(x => x.AccountId == createReadingModel.AccountId
+                                                          && x.ReadingDateTime == createReadingModel.ReadingDateTime
+                                                          && x.MeterReadValue == createReadingModel.MeterReadValue))
+            {
+                result.Add("error", "Reading already exists");
             }
             else
             {
@@ -91,8 +102,10 @@ namespace EnsekCodingExercise.ApiService.Services
 
                 account.Readings.Add(reading);
                 await context.SaveChangesAsync();
-                return reading.ReadingId;
+                result.Add("success", reading.ReadingId.ToString());
             }
+            
+            return result;
         }
 
         /// <summary>

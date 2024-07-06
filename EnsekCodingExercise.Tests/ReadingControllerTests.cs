@@ -57,13 +57,13 @@ namespace EnsekCodingExercise.Tests
         {
             // Arrange
             var createReadingModel = new CreateReadingModel();
-            _mockReadingsService.Setup(service => service.CreateReading(It.IsAny<CreateReadingModel>())).ReturnsAsync(1);
+            _mockReadingsService.Setup(service => service.CreateReading(It.IsAny<CreateReadingModel>())).ReturnsAsync(new Dictionary<string, string> { {"Created", "1"} });
 
             // Act
             var result = await _controller.CreateReading(createReadingModel);
 
             // Assert
-            var actionResult = Assert.IsType<ActionResult<int>>(result);
+            var actionResult = Assert.IsType<ActionResult<Dictionary<string, string>>>(result);
             var createdAtActionResult = Assert.IsType<CreatedResult>(actionResult.Result);
             Assert.Equal(201, createdAtActionResult.StatusCode);
         }

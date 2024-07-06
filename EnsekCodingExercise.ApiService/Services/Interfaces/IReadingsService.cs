@@ -25,7 +25,7 @@ namespace EnsekCodingExercise.ApiService.Services.Interfaces
         /// </summary>
         /// <param name="createReadingModel">The model containing the data needed to create a new reading.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains the ID of the newly created reading.</returns>
-        Task<int> CreateReading(CreateReadingModel createReadingModel);
+        Task<Dictionary<string, string>> CreateReading(CreateReadingModel createReadingModel);
 
         /// <summary>
         /// Edits an existing meter reading.

@@ -1,0 +1,107 @@
+﻿@using EnsekCodingExercise.Web.Clients
+@using EnsekCodingExercise.Web.Models
+@inject ReadingsApiClient readingsApiClient
+
+@if (editReading == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="@editReading" OnValidSubmit="SaveChanges">
+        <DataAnnotationsValidator />
+        <div class="form-group row mb-3">
+            <label class="col-md-4 col-form-label">Reading ID:</label>
+            <label class="col-md-6 col-form-label">@editReading.ReadingId</label>
+        </div>
+        <div class="form-group row mb-3">
+            <label class="col-md-4 col-form-label">Reading Date: <span class="text-danger">*</span></label>
+            <div class="col-md-6">
+                <DateInput TValue="DateOnly?" @bind-Value="editReading.ReadingDate" Placeholder="Enter Reading Date Time" />
+                <ValidationMessage For="@(() => editReading.ReadingDate)" />
+            </div>
+        </div>
+        <div class="form-group row mb-3">
+            <label class="col-md-4 col-form-label">Reading Date: <span class="text-danger">*</span></label>
+            <div class="col-md-6">
+                <TimeInput TValue="TimeOnly?" @bind-Value="editReading.ReadingTime" Placeholder="Enter Reading Time" />
+                <ValidationMessage For="@(() => editReading.ReadingTime)" />
+            </div>
+        </div>
+        <div class="form-group row mb-3">
+            <label class="col-md-4 col-form-label">Meter Read Value: <span class="text-danger">*</span></label>
+            <div class="col-md-6">
+                <InputText class="form-control" @bind-Value="editReading.MeterReadValue" Placeholder="Enter Meter Read Value" />
+                <ValidationMessage For="@(() => editReading.MeterReadValue)" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-right">
+                <Button Type="ButtonType.Submit" Color="ButtonColor.Success" Class="float-end me-2" data-dismiss="modal">Submit</Button>
+            </div>
+        </div>
+    </EditForm>
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger mt-3">@errorMessage</div>
+    }
+}
+
+@code {
+    private EnsekCodingExercise.Web.Models.EditReading? editReading;
+    private string? errorMessage;
+
+    [Parameter] public int Id { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClickCallback { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetReading();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await GetReading();
+    }
+
+    private async Task GetReading()
+    {
+        var reading = await readingsApiClient.GetReadingByIdAsync(Id);
+        if (reading != null)
+        {
+            editReading = new Models.EditReading
+                {
+                    ReadingId = reading.ReadingId,
+                    MeterReadValue = reading.MeterReadValue
+                };
+
+            if (reading.ReadingDateTime.HasValue)
+            {
+                editReading.ReadingDate = DateOnly.FromDateTime(reading.ReadingDateTime.Value);
+                editReading.ReadingTime = TimeOnly.FromDateTime(reading.ReadingDateTime.Value);
+            }
+        }
+    }
+
+    private async Task SaveChanges()
+    {
+        errorMessage = null;
+        if (editReading != null)
+        {
+            try
+            {
+                await readingsApiClient.EditReadingAsync(editReading.ReadingId, editReading);
+                await OnClickCallback.InvokeAsync();
+                editReading = null;
+            }
+            catch (HttpRequestException ex)
+            {
+                errorMessage = ex.Message;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"An unexpected error occurred: {ex.Message}";
+            }
+        }
+    }
+}

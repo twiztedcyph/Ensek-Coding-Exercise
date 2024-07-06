@@ -3,6 +3,7 @@ using EnsekCodingExercise.ApiService.Infrastructure.BaseControllers;
 using EnsekCodingExercise.ApiService.Models.External;
 using EnsekCodingExercise.ApiService.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace EnsekCodingExercise.ApiService.Controllers
 {
@@ -73,12 +74,19 @@ namespace EnsekCodingExercise.ApiService.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<int>> CreateReading([FromBody] CreateReadingModel createReadingModel)
+        public async Task<ActionResult<Dictionary<string, string>>> CreateReading([FromBody] CreateReadingModel createReadingModel)
         {
             if (ModelState.IsValid)
             {
-                var readingId = await _readingsService.CreateReading(createReadingModel);
-                return Created(string.Empty, readingId);
+                var result = await _readingsService.CreateReading(createReadingModel);
+                if (result.ContainsKey("error"))
+                {
+                    return BadRequest(result);
+                }
+                else
+                {
+                    return Created(string.Empty, result);
+                }
             }
             else
             {
