@@ -1,7 +1,3 @@
-Delete FROM [EnsekCodingExercise].[dbo].[__EFMigrationsHistory];
-Drop table [EnsekCodingExercise].[dbo].Readings;
-Drop table [EnsekCodingExercise].[dbo].Accounts;
-
 # Ensek-Coding-Exercise
 Coding exercise for ENSEK
 
