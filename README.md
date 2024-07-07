@@ -5,7 +5,9 @@ It's a C# an ASP.NET Core 8 WebAPI backend (plus unit tests) with a Blazor front
 
 ## Thoughts
 I most write backends so that's where I spent most of the time and I am quite happy with how that part turned out.
+
 The front end was much more of a fun learning experience for me. I've been saying Blazor is the future for a while now but hadn't ever tried it out, so this was a good opportunity to do that.
+Givem more time and available effort I would want to drastically improve error handling and look of the front end.
 
 ## Finally
 Thanks for taking the time to consider this submission.
