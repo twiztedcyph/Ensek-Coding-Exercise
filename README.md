@@ -1,3 +1,16 @@
+# Developer Notes
+This is my submission for the Ensek Coding Exercise. 
+
+It's a C# an ASP.NET Core 8 WebAPI backend (plus unit tests) with a Blazor front end.
+
+## Thoughts
+I most write backends so that's where I spent most of the time and I am quite happy with how that part turned out.
+The front end was much more of a fun learning experience for me. I've been saying Blazor is the future for a while now but hadn't ever tried it out, so this was a good opportunity to do that.
+
+## Finally
+Thanks for taking the time to consider this submission.
+
+
 # Ensek-Coding-Exercise
 Coding exercise for ENSEK
 
