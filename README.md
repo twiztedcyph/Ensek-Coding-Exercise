@@ -3,6 +3,9 @@ This is my submission for the Ensek Coding Exercise.
 
 It's a C# an ASP.NET Core 8 WebAPI backend (plus unit tests) with a Blazor front end.
 
+## Instructions
+The database is created and seeded via a migration. I'm not a fan of auto migration so you will need to run the following on first start: Update-Database -Project EnsekCodingExercise.ApiService -StartupProject EnsekCodingExercise.ApiService
+
 ## Thoughts
 I most write backends so that's where I spent most of the time and I am quite happy with how that part turned out.
 
