@@ -39,6 +39,30 @@ namespace EnsekCodingExercise.Web.Clients
             }
         }
 
+        // Get readings by account ID
+        public async Task<List<Reading>> GetReadingsByAccountIdAsync(int accountId, CancellationToken cancellationToken = default)
+        {
+            var response = await _httpClient.GetAsync($"/v1/readings/account/{accountId}", cancellationToken);
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<List<Reading>>(cancellationToken: cancellationToken) ?? new List<Reading>();
+                return result;
+            }
+            else
+            {
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+
+                   return new List<Reading>();
+                }
+                else
+                {
+                    // Handle error response
+                    throw new HttpRequestException($"Error fetching readings for account ID {accountId}: {response.ReasonPhrase}");
+                }
+            }
+        }
+
         // Create reading
         public async Task CreateReadingAsync(CreateReading createReadingModel, CancellationToken cancellationToken = default)
         {

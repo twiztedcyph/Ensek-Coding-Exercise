@@ -147,7 +147,6 @@ namespace EnsekCodingExercise.ApiService.Controllers
             }
         }
 
-
         /// <summary>
         /// Upload meter readings
         /// </summary>
@@ -176,6 +175,35 @@ namespace EnsekCodingExercise.ApiService.Controllers
             {
                 UploadResults uploadResults = await _readingsService.UploadReadingsFromFile(formFile);
                 return Ok(uploadResults);
+            }
+        }
+
+        /// <summary>
+        /// Get all meter readings for a given account ID
+        /// </summary>
+        /// <param name="accountId">The account ID</param>
+        /// <returns>A list of meter readings for the given account ID</returns>
+        [ApiVersion("1")]
+        [HttpGet("account/{accountId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<List<ReadingDto>>> GetReadingsByAccountId(int? accountId)
+        {
+            if (accountId == null)
+            {
+                return BadRequest("An account ID is required");
+            }
+            else
+            {
+                var readings = await _readingsService.GetReadingsByAccountId(accountId.Value);
+                if (readings == null || readings.Count == 0)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    return Ok(readings);
+                }
             }
         }
     }

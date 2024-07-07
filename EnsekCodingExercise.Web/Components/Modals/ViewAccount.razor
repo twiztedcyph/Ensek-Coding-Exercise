@@ -1,6 +1,7 @@
 ﻿@using EnsekCodingExercise.Web.Clients
 @using EnsekCodingExercise.Web.Models
 @inject AccountsApiClient accountApiClient
+@inject ReadingsApiClient readingsApiClient
 
 @if (account == null)
 {
@@ -20,22 +21,56 @@ else
         <label class="col-md-4 col-form-label">Last Name:</label>
         <label class="col-md-6 col-form-label">@account.LastName</label>
     </div>
+
+    @if (readings == null)
+    {
+        <p><em>Loading readings...</em></p>
+    }
+    else if (readings.Count == 0)
+    {
+        <p>No readings available for this account.</p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Reading Id</th>
+                    <th>Reading Date</th>
+                    <th>Meter Read Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var reading in readings)
+                {
+                    <tr>
+                        <td>@reading.ReadingId</td>
+                        <td>@reading.ReadingDateTime</td>
+                        <td>@reading.MeterReadValue</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 }
 
 @code {
     private Account? account;
+    private List<Reading>? readings;
 
     [Parameter] public int AccountId { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         account = await accountApiClient.GetAccountByIdAsync(AccountId);
+        readings = await readingsApiClient.GetReadingsByAccountIdAsync(AccountId);
         await base.OnInitializedAsync();
     }
 
     protected override async Task OnParametersSetAsync()
     {
         account = await accountApiClient.GetAccountByIdAsync(AccountId);
+        readings = await readingsApiClient.GetReadingsByAccountIdAsync(AccountId);
         await base.OnParametersSetAsync();
     }
 }

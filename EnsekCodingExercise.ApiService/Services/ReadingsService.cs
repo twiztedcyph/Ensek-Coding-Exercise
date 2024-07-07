@@ -66,6 +66,25 @@ namespace EnsekCodingExercise.ApiService.Services
         }
 
         /// <summary>
+        /// Get all meter readings for a given account ID
+        /// </summary>
+        /// <param name="accountId">The account ID</param>
+        /// <returns>A list of meter readings for the given account ID</returns>
+        public async Task<List<ReadingDto>> GetReadingsByAccountId(int accountId)
+        {
+            using var context = await _dbContextFactory.CreateDbContextAsync();
+            return await context.Readings
+                .Where(x => x.AccountId == accountId)
+                .Select(x => new ReadingDto
+                {
+                    ReadingId = x.ReadingId,
+                    AccountId = x.AccountId,
+                    ReadingDateTime = x.ReadingDateTime,
+                    MeterReadValue = x.MeterReadValue
+                }).ToListAsync();
+        }
+
+        /// <summary>
         /// Create a Reading
         /// </summary>
         /// <param name="createReadingModel">Model containing the details of the reading to be created</param>
@@ -104,7 +123,7 @@ namespace EnsekCodingExercise.ApiService.Services
                 await context.SaveChangesAsync();
                 result.Add("success", reading.ReadingId.ToString());
             }
-            
+
             return result;
         }
 

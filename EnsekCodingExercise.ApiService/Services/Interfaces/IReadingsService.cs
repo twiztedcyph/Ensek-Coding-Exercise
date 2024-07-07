@@ -21,6 +21,13 @@ namespace EnsekCodingExercise.ApiService.Services.Interfaces
         Task<ReadingDto?> GetReadingById(int id);
 
         /// <summary>
+        /// Get all meter readings for a given account ID
+        /// </summary>
+        /// <param name="accountId">The account ID</param>
+        /// <returns>A list of meter readings for the given account ID</returns>
+        Task<List<ReadingDto>> GetReadingsByAccountId(int accountId);
+
+        /// <summary>
         /// Creates a new meter reading.
         /// </summary>
         /// <param name="createReadingModel">The model containing the data needed to create a new reading.</param>
